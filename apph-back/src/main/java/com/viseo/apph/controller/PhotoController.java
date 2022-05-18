@@ -8,6 +8,7 @@ import com.viseo.apph.domain.Tag;
 import com.viseo.apph.domain.User;
 import com.viseo.apph.dto.*;
 import com.viseo.apph.exception.InvalidFileException;
+import com.viseo.apph.exception.NotFoundException;
 import com.viseo.apph.exception.UnauthorizedException;
 import com.viseo.apph.service.PhotoService;
 import com.viseo.apph.service.TagService;
@@ -53,6 +54,20 @@ public class PhotoController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponse("Token not valid"));
         } catch (ExpiredJwtException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponse("Token expired"));
+        }
+    }
+
+    @PostMapping("/editInfos")
+    public ResponseEntity<IResponseDTO> editInfos(@RequestHeader("Authorization") String token, @ModelAttribute PhotoRequest photoRequest) {
+        try {
+            Claims claims = Jwts.parserBuilder().setSigningKey(JwtConfig.getKey()).build().parseClaimsJws(token).getBody();
+            return ResponseEntity.ok(new MessageResponse(photoService.editPhotoInfos(claims.get("login").toString(), photoRequest)));
+        } catch (IOException | S3Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MessageResponse("Une erreur est survenue lors de l'upload"));
+        } catch (InvalidFileException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageResponse("Le format du fichier n'est pas valide"));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponse("Photo introuvable"));
         }
     }
 

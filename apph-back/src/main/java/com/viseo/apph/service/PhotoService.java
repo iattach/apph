@@ -1,5 +1,6 @@
 package com.viseo.apph.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.GsonBuilder;
 import com.viseo.apph.dao.PhotoDao;
 import com.viseo.apph.dao.S3Dao;
@@ -11,6 +12,7 @@ import com.viseo.apph.dto.PaginationResponse;
 import com.viseo.apph.dto.PhotoRequest;
 import com.viseo.apph.dto.PhotoResponse;
 import com.viseo.apph.exception.InvalidFileException;
+import com.viseo.apph.exception.NotFoundException;
 import com.viseo.apph.exception.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,6 +54,21 @@ public class PhotoService {
                 .setTags(allTags);
         photo = photoDao.addPhoto(photo);
         return s3Dao.upload(photoRequest.getFile(), photo);
+    }
+
+    @Transactional
+    public String editPhotoInfos(String userLogin, PhotoRequest photoRequest) throws JsonProcessingException, InvalidFileException, NotFoundException {
+        User user = userDao.getUserByLogin(userLogin);
+        Photo photo = photoDao.getPhoto(photoRequest.getId());
+        if (photo == null) throw new NotFoundException("photo not found");
+        Set<Tag> newTags = tagService.createListTags(photoRequest.getTags(), user);
+        newTags.addAll(photo.getTags());
+        Date shootingDate = photoRequest.getShootingDate() != null ? new GsonBuilder().setDateFormat("dd/MM/yyyy, hh:mm:ss").create().fromJson(photoRequest.getShootingDate(), Date.class) : new Date();
+        photo.setTitle(photoRequest.getTitle())
+             .setDescription(photoRequest.getDescription())
+             .setShootingDate(shootingDate)
+             .setTags(newTags);
+        return "Photo édité";
     }
 
     public String getFormat(MultipartFile file) throws InvalidFileException {
