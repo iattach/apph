@@ -6,6 +6,7 @@ import com.viseo.apph.dto.MessageResponse;
 import com.viseo.apph.dto.PaginationResponse;
 import com.viseo.apph.dto.PhotoRequest;
 import com.viseo.apph.exception.InvalidFileException;
+import com.viseo.apph.exception.NotFoundException;
 import com.viseo.apph.exception.UnauthorizedException;
 import com.viseo.apph.security.Utils;
 import com.viseo.apph.service.PhotoService;
@@ -41,6 +42,21 @@ public class PhotoController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponse("User does not exist"));
         } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageResponse("Argument illégal."));
+        }
+    }
+
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @PostMapping("/editInfos")
+    public ResponseEntity<IResponseDTO> editInfos(@RequestHeader("Authorization") String token, @ModelAttribute PhotoRequest photoRequest) {
+        try {
+            Claims claims = Jwts.parserBuilder().setSigningKey(JwtConfig.getKey()).build().parseClaimsJws(token).getBody();
+            return ResponseEntity.ok(new MessageResponse(photoService.editPhotoInfos(claims.get("login").toString(), photoRequest)));
+        } catch (IOException | S3Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MessageResponse("Une erreur est survenue lors de l'upload"));
+        } catch (InvalidFileException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageResponse("Le format du fichier n'est pas valide"));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponse("Photo introuvable"));
         }
     }
 
