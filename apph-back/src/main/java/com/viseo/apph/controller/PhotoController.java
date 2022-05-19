@@ -48,7 +48,7 @@ public class PhotoController {
 
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @PostMapping("/editInfos")
-    public ResponseEntity<IResponseDto> editInfos(@RequestHeader("Authorization") String token, @ModelAttribute PhotoRequest photoRequest) {
+    public ResponseEntity<IResponseDto> editInfos(@ModelAttribute PhotoRequest photoRequest) {
         try {
             User user = utils.getUser();
             return ResponseEntity.ok(new MessageResponse(photoService.editPhotoInfos(user, photoRequest)));
