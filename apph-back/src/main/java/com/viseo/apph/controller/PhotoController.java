@@ -11,6 +11,7 @@ import com.viseo.apph.exception.UnauthorizedException;
 import com.viseo.apph.security.Utils;
 import com.viseo.apph.service.PhotoService;
 import com.viseo.apph.service.UserService;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,25 +48,10 @@ public class PhotoController {
 
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @PostMapping("/editInfos")
-    public ResponseEntity<IResponseDTO> editInfos(@RequestHeader("Authorization") String token, @ModelAttribute PhotoRequest photoRequest) {
+    public ResponseEntity<IResponseDto> editInfos(@RequestHeader("Authorization") String token, @ModelAttribute PhotoRequest photoRequest) {
         try {
-            Claims claims = Jwts.parserBuilder().setSigningKey(JwtConfig.getKey()).build().parseClaimsJws(token).getBody();
-            return ResponseEntity.ok(new MessageResponse(photoService.editPhotoInfos(claims.get("login").toString(), photoRequest)));
-        } catch (IOException | S3Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MessageResponse("Une erreur est survenue lors de l'upload"));
-        } catch (InvalidFileException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageResponse("Le format du fichier n'est pas valide"));
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponse("Photo introuvable"));
-        }
-    }
-
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    @PostMapping("/upload")
-    public ResponseEntity<IResponseDTO> upload(@RequestHeader("Authorization") String token, @ModelAttribute PhotoRequest photoRequest) {
-        try {
-            Claims claims = Jwts.parserBuilder().setSigningKey(JwtConfig.getKey()).build().parseClaimsJws(token).getBody();
-            return ResponseEntity.ok(new MessageResponse(photoService.editPhotoInfos(claims.get("login").toString(), photoRequest)));
+            User user = utils.getUser();
+            return ResponseEntity.ok(new MessageResponse(photoService.editPhotoInfos(user, photoRequest)));
         } catch (IOException | S3Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MessageResponse("Une erreur est survenue lors de l'upload"));
         } catch (InvalidFileException e) {
