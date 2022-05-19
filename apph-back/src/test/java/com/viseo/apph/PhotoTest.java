@@ -135,6 +135,37 @@ public class PhotoTest {
     }
 
     @Test
+    public void TestEditPhotoInfos() {
+        //GIVEN
+        createPhotoController();
+        Set<Tag> oldTags = new HashSet<>();
+        Tag oneOldTag = new Tag().setName("+ Add New Tag tag");
+        oldTags.add(oneOldTag);
+        User user = new User().setLogin("toto").setPassword("password");
+        Photo oldPhoto = new Photo().setCreationDate(new Date()).setShootingDate(new Date()).setFormat(".png").setTitle("title").setDescription("desc").setSize(1).setUser(user).setTags(oldTags);
+        Set<Tag> newTags = new HashSet<>();
+        Tag oneNewTag = new Tag().setName("+ Add New Tag new tag");
+        newTags.add(oneNewTag);
+        GsonBuilder builder = new GsonBuilder();
+        Gson gson = builder.create();
+        photoRequest = new PhotoRequest().setTitle("newTitle").setTags(gson.toJson(newTags)).setShootingDate(gson.toJson("13/05/2022, 12:07:57")).setDescription("newDesc").setId(1L);
+        String jws = Jwts.builder().claim("login", user.getLogin()).setExpiration(new Date(System.currentTimeMillis() + 20000)).signWith(JwtConfig.getKey()).compact();
+        when(em.createQuery("SELECT u FROM User u WHERE u.login=:login", User.class)).thenReturn(typedQueryUser);
+        when(typedQueryUser.setParameter("login", user.getLogin())).thenReturn(typedQueryUser);
+        when(typedQueryUser.getSingleResult()).thenReturn(user);
+        when(em.find(Photo.class, 1L)).thenReturn(oldPhoto);
+        //WHEN
+        ResponseEntity<IResponseDTO> responseEntity = photoController.editInfos(jws, photoRequest);
+        //THEN
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals("newTitle", oldPhoto.getTitle());
+        assertEquals("newDesc", oldPhoto.getDescription());
+        assertNotNull(oldPhoto.getShootingDate());
+        assertTrue(oldPhoto.getTags().contains(oneOldTag));
+        assertTrue(oldPhoto.getTags().contains(oneOldTag));
+    }
+
+    @Test
     public void TestGetUserPhotosUrl() {
         //GIVEN
         createPhotoController();
