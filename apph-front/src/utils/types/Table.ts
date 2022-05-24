@@ -13,6 +13,7 @@ export interface ITable {
 }
 
 export interface IPhotoDetails {
+  photoId: number;
   photoSrc: string;
   title: string;
   description: string;

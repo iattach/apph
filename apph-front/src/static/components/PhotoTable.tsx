@@ -101,6 +101,7 @@ export const PhotoTable = () => {
           (row) =>
             (row.details = (
               <PhotoDetails
+                photoId={row.id}
                 photoSrc={row.url}
                 title={row.title}
                 description={row.description}

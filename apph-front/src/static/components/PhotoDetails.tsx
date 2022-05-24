@@ -5,6 +5,7 @@ import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { IPhotoDetails } from '../../utils';
+import { EditPhotoDetails } from './EditPhotoDetails';
 
 const modalStyle = {
   position: 'absolute',
@@ -27,6 +28,7 @@ const titleTypoStyle = { fontWeight: 'bold', pl: 15 };
 const detailTypoStyle = { ml: 1 };
 
 const PhotoDetails = ({
+  photoId,
   photoSrc,
   title,
   description,
@@ -115,6 +117,15 @@ const PhotoDetails = ({
                     return tag.name;
                   })}
                 </Typography>
+              </Box>
+              <Box sx={{ pl: 15, mt: 2 }}>
+                <EditPhotoDetails
+                  id={photoId}
+                  title={title}
+                  description={description}
+                  shootingDate={shootingDate}
+                  tags={tags}
+                />
               </Box>
             </Box>
           </Typography>

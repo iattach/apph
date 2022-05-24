@@ -22,6 +22,7 @@ describe('Test du composant PhotoDetails', () => {
     };
     render(
       <PhotoDetails
+        photoId={0}
         photoSrc={mockPhoto.src}
         title={mockPhoto.title}
         description={mockPhoto.description}
