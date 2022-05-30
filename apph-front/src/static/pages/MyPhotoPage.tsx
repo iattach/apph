@@ -9,6 +9,7 @@ import { IPagination, ITable } from '../../utils';
 import { Diaporama } from '../components/Diaporama';
 import PhotoService from '../../services/PhotoService';
 import { MovePhoto } from '../components/MovePhoto';
+import { DownloadZip } from '../components/DownloadZip';
 
 export const MyPhotoPage = (): JSX.Element => {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -36,6 +37,7 @@ export const MyPhotoPage = (): JSX.Element => {
       >
         <UploadImage />
         <MovePhoto photoIds={selectedIds} />
+        <DownloadZip ids={selectedIds} />
         <DeleteImage ids={selectedIds} />
         <Diaporama data={selected} />
       </ButtonGroup>
